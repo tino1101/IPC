@@ -15,14 +15,18 @@ public class BookManagerService extends Service {
     private Binder mBinder = new IBookManager.Stub() {
         @Override
         public List<Book> getBookList() throws RemoteException {
-            Log.i("BookManager", "BookManagerService--getBookList()");
-            return mBookList;
+            synchronized (mBookList) {
+                Log.i("BookManager", "BookManagerService--getBookList()");
+                return mBookList;
+            }
         }
 
         @Override
         public void addBook(Book book) throws RemoteException {
-            mBookList.add(book);
-            Log.i("BookManager", "BookManagerService--addBook()");
+            synchronized (mBookList) {
+                mBookList.add(book);
+                Log.i("BookManager", "BookManagerService--addBook()");
+            }
         }
     };
 
