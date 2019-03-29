@@ -1,4 +1,4 @@
-package com.tino.ipc.binder;
+package com.tino.ipc.aidl;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -10,6 +10,11 @@ public class Book implements Parcelable {
     protected Book(Parcel in) {
         id = in.readInt();
         name = in.readString();
+    }
+
+    public Book(int id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
     public static final Creator<Book> CREATOR = new Creator<Book>() {
