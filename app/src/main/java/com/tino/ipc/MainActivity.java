@@ -18,20 +18,19 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
-
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
+            Log.i("BookManager", "onServiceConnected()");
             IBookManager bookManager = IBookManager.Stub.asInterface(service);
             try {
                 List<Book> list = bookManager.getBookList();
-                Log.i(TAG, "query book list,list type:" + list.getClass().getCanonicalName());
-                Log.i(TAG, "query book list:" + list.toString());
-                Book newBook = new Book(3, "book3");
-                bookManager.addBook(newBook);
-                Log.i(TAG, "add book:" + newBook);
-                List<Book> newList = bookManager.getBookList();
-                Log.i(TAG, "query book list:" + newList.toString());
+                Log.i("BookManager", "List Type:" + list.getClass().getCanonicalName());
+                Log.i("BookManager", "Book List:" + list.toString());
+//                Book newBook = new Book(3, "book3");
+//                bookManager.addBook(newBook);
+//                Log.i("BookManager", "Add Book:" + newBook);
+//                List<Book> newList = bookManager.getBookList();
+//                Log.i("BookManager", "Book List:" + newList.toString());
             } catch (RemoteException e) {
                 e.printStackTrace();
             }

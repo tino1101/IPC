@@ -5,6 +5,7 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Parcel;
 import android.os.RemoteException;
+import android.util.Log;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public interface IBookManager extends IInterface {
          */
         public Stub() {
             this.attachInterface(this, DESCRIPTOR);
+            Log.i("BookManager", "Stub--Stub()");
         }
 
         /**
@@ -27,6 +29,7 @@ public interface IBookManager extends IInterface {
          * generating a proxy if needed.
          */
         public static IBookManager asInterface(IBinder obj) {
+            Log.i("BookManager", "Stub--asInterface()");
             if ((obj == null)) {
                 return null;
             }
@@ -39,25 +42,25 @@ public interface IBookManager extends IInterface {
 
         @Override
         public IBinder asBinder() {
+            Log.i("BookManager", "Stub--asBinder()");
             return this;
         }
 
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+            Log.i("BookManager", "Stub--onTransact()");
             String descriptor = DESCRIPTOR;
             switch (code) {
-                case INTERFACE_TRANSACTION: {
+                case INTERFACE_TRANSACTION:
                     reply.writeString(descriptor);
                     return true;
-                }
-                case TRANSACTION_getBookList: {
+                case TRANSACTION_getBookList:
                     data.enforceInterface(descriptor);
                     List<Book> books = this.getBookList();
                     reply.writeNoException();
                     reply.writeTypedList(books);
                     return true;
-                }
-                case TRANSACTION_addBook: {
+                case TRANSACTION_addBook:
                     data.enforceInterface(descriptor);
                     Book book;
                     if ((0 != data.readInt())) {
@@ -68,10 +71,8 @@ public interface IBookManager extends IInterface {
                     this.addBook(book);
                     reply.writeNoException();
                     return true;
-                }
-                default: {
+                default:
                     return super.onTransact(code, data, reply, flags);
-                }
             }
         }
 
@@ -79,11 +80,13 @@ public interface IBookManager extends IInterface {
             private IBinder mRemote;
 
             Proxy(IBinder remote) {
+                Log.i("BookManager", "Stub--Proxy--Proxy()");
                 mRemote = remote;
             }
 
             @Override
             public IBinder asBinder() {
+                Log.i("BookManager", "Stub--Proxy--asBinder()");
                 return mRemote;
             }
 
@@ -93,6 +96,7 @@ public interface IBookManager extends IInterface {
 
             @Override
             public List<Book> getBookList() throws RemoteException {
+                Log.i("BookManager", "Stub--Proxy--getBookList()");
                 Parcel data = Parcel.obtain();
                 Parcel reply = Parcel.obtain();
                 List<Book> books;
@@ -110,6 +114,7 @@ public interface IBookManager extends IInterface {
 
             @Override
             public void addBook(Book book) throws RemoteException {
+                Log.i("BookManager", "Stub--Proxy--addBook()");
                 Parcel data = Parcel.obtain();
                 Parcel reply = Parcel.obtain();
                 try {
