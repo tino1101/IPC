@@ -18,11 +18,25 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private IBookManager bookManager;
+
     private ServiceConnection mConnection = new ServiceConnection() {
+
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.i("BookManager", "onServiceConnected()");
-            IBookManager bookManager = IBookManager.Stub.asInterface(service);
+            bookManager = IBookManager.Stub.asInterface(service);
             try {
+                service.linkToDeath(new IBinder.DeathRecipient() {
+                    @Override
+                    public void binderDied() {
+                        if (bookManager == null) return;
+                        bookManager.asBinder().unlinkToDeath(this, 0);
+                        bookManager = null;
+                        // 重新绑定远程Service
+                        Intent intent = new Intent(MainActivity.this, BookManagerService.class);
+                        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+                    }
+                }, 0);
                 List<Book> list = bookManager.getBookList();
                 Log.i("BookManager", "List Type:" + list.getClass().getCanonicalName());
                 Log.i("BookManager", "Book List:" + list.toString());
