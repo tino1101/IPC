@@ -30,12 +30,10 @@ public interface IBookManager extends IInterface {
          */
         public static IBookManager asInterface(IBinder obj) {
             Log.i("BookManager", "Stub--asInterface()");
-            if ((obj == null)) {
-                return null;
-            }
+            if (obj == null) return null;
             IInterface iin = obj.queryLocalInterface(DESCRIPTOR);
-            if (((iin != null) && (iin instanceof IBookManager))) {
-                return ((IBookManager) iin);
+            if (iin != null && iin instanceof IBookManager) {
+                return (IBookManager) iin;
             }
             return new Proxy(obj);
         }
@@ -63,7 +61,7 @@ public interface IBookManager extends IInterface {
                 case TRANSACTION_addBook:
                     data.enforceInterface(descriptor);
                     Book book;
-                    if ((0 != data.readInt())) {
+                    if (0 != data.readInt()) {
                         book = Book.CREATOR.createFromParcel(data);
                     } else {
                         book = null;
@@ -71,6 +69,22 @@ public interface IBookManager extends IInterface {
                     this.addBook(book);
                     reply.writeNoException();
                     return true;
+                case TRANSACTION_registerListener: {
+                    data.enforceInterface(descriptor);
+                    IOnNewBookArrivedListener listener;
+                    listener = IOnNewBookArrivedListener.Stub.asInterface(data.readStrongBinder());
+                    registerListener(listener);
+                    reply.writeNoException();
+                    return true;
+                }
+                case TRANSACTION_unregisterListener: {
+                    data.enforceInterface(descriptor);
+                    IOnNewBookArrivedListener listener;
+                    listener = IOnNewBookArrivedListener.Stub.asInterface(data.readStrongBinder());
+                    unregisterListener(listener);
+                    reply.writeNoException();
+                    return true;
+                }
                 default:
                     return super.onTransact(code, data, reply, flags);
             }
@@ -119,7 +133,7 @@ public interface IBookManager extends IInterface {
                 Parcel reply = Parcel.obtain();
                 try {
                     data.writeInterfaceToken(DESCRIPTOR);
-                    if ((book != null)) {
+                    if (book != null) {
                         data.writeInt(1);
                         book.writeToParcel(data, 0);
                     } else {
@@ -132,13 +146,49 @@ public interface IBookManager extends IInterface {
                     data.recycle();
                 }
             }
+
+            @Override
+            public void registerListener(IOnNewBookArrivedListener listener) throws RemoteException {
+                Parcel data = Parcel.obtain();
+                Parcel reply = Parcel.obtain();
+                try {
+                    data.writeInterfaceToken(DESCRIPTOR);
+                    data.writeStrongBinder(listener != null ? listener.asBinder() : null);
+                    mRemote.transact(Stub.TRANSACTION_registerListener, data, reply, 0);
+                    reply.readException();
+                } finally {
+                    reply.recycle();
+                    data.recycle();
+                }
+            }
+
+            @Override
+            public void unregisterListener(IOnNewBookArrivedListener listener) throws RemoteException {
+                Parcel data = Parcel.obtain();
+                Parcel reply = Parcel.obtain();
+                try {
+                    data.writeInterfaceToken(DESCRIPTOR);
+                    data.writeStrongBinder(listener != null ? listener.asBinder() : null);
+                    mRemote.transact(Stub.TRANSACTION_unregisterListener, data, reply, 0);
+                    reply.readException();
+                } finally {
+                    reply.recycle();
+                    data.recycle();
+                }
+            }
         }
 
         static final int TRANSACTION_getBookList = (IBinder.FIRST_CALL_TRANSACTION + 0);
         static final int TRANSACTION_addBook = (IBinder.FIRST_CALL_TRANSACTION + 1);
+        static final int TRANSACTION_registerListener = (IBinder.FIRST_CALL_TRANSACTION + 2);
+        static final int TRANSACTION_unregisterListener = (IBinder.FIRST_CALL_TRANSACTION + 3);
     }
 
     List<Book> getBookList() throws RemoteException;
 
     void addBook(Book book) throws RemoteException;
+
+    void registerListener(IOnNewBookArrivedListener listener) throws RemoteException;
+
+    void unregisterListener(IOnNewBookArrivedListener listener) throws RemoteException;
 }
