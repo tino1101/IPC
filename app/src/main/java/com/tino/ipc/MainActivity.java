@@ -23,9 +23,7 @@ public class MainActivity extends AppCompatActivity {
 
     private IBookManager bookManager;
 
-    private IBookManager mRemoteBookManager;
-
-    private static final int MESSAGE_NEW_BOOK_ARRIVED = 1;
+    private static final int MESSAGE_NEW_BOOK_ARRIVED = 0x10;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -46,7 +44,6 @@ public class MainActivity extends AppCompatActivity {
             Log.i("BookManager", "onServiceConnected()");
             bookManager = IBookManager.Stub.asInterface(service);
             try {
-                mRemoteBookManager = bookManager;
                 service.linkToDeath(new IBinder.DeathRecipient() {
                     @Override
                     public void binderDied() {
@@ -73,19 +70,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            mRemoteBookManager = null;
+            bookManager = null;
             Log.i("BookManager", "binder died");
         }
     };
 
-    private IOnNewBookArrivedListener mOnNewBookArrivedListener = new
-            IOnNewBookArrivedListener.Stub() {
-                @Override
-                public void onNewBookArrived(Book newBook) throws RemoteException {
-                    mHandler.obtainMessage(MESSAGE_NEW_BOOK_ARRIVED, newBook)
-                            .sendToTarget();
-                }
-            };
+    private IOnNewBookArrivedListener mOnNewBookArrivedListener = new IOnNewBookArrivedListener.Stub() {
+        @Override
+        public void onNewBookArrived(Book newBook) throws RemoteException {
+            mHandler.obtainMessage(MESSAGE_NEW_BOOK_ARRIVED, newBook).sendToTarget();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,10 +92,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        if (mRemoteBookManager != null && mRemoteBookManager.asBinder().isBinderAlive()) {
+        if (bookManager != null && bookManager.asBinder().isBinderAlive()) {
             try {
                 Log.i("BookManager", "unregister listener:" + mOnNewBookArrivedListener);
-                mRemoteBookManager.unregisterListener(mOnNewBookArrivedListener);
+                bookManager.unregisterListener(mOnNewBookArrivedListener);
             } catch (RemoteException e) {
                 e.printStackTrace();
             }

@@ -4,7 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Book implements Parcelable {
+
     public int id;
+
     public String name;
 
     protected Book(Parcel in) {

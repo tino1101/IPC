@@ -13,9 +13,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BookManagerService extends Service {
+
     private CopyOnWriteArrayList<Book> mBookList = new CopyOnWriteArrayList();
+
     private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
+
     private RemoteCallbackList<IOnNewBookArrivedListener> mListenerList = new RemoteCallbackList<>();
+
     private Binder mBinder = new IBookManager.Stub() {
         @Override
         public List<Book> getBookList() throws RemoteException {
@@ -47,9 +51,10 @@ public class BookManagerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mBookList.add(new Book(1, "book1"));
-        mBookList.add(new Book(2, "book2"));
+        mBookList.add(new Book(1, "book#1"));
+        mBookList.add(new Book(2, "book#2"));
         Log.i("BookManager", "BookManagerService--onCreate()");
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -79,7 +84,7 @@ public class BookManagerService extends Service {
 
     private void onNewBookArrived(Book book) throws RemoteException {
         mBookList.add(book);
-        final int N = mListenerList.beginBroadcast();
+        int N = mListenerList.beginBroadcast();
         for (int i = 0; i < N; i++) {
             IOnNewBookArrivedListener l = mListenerList.getBroadcastItem(i);
             if (l != null) {

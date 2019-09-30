@@ -13,7 +13,7 @@ public interface IOnNewBookArrivedListener extends IInterface {
         private static final String DESCRIPTOR = "com.tino.ipc.aidl.IOnNewBookArrivedListener";
 
         public Stub() {
-            this.attachInterface(this, DESCRIPTOR);
+            attachInterface(this, DESCRIPTOR);
         }
 
         public static IOnNewBookArrivedListener asInterface(IBinder obj) {
@@ -22,7 +22,7 @@ public interface IOnNewBookArrivedListener extends IInterface {
             if (iin != null && iin instanceof IOnNewBookArrivedListener) {
                 return (IOnNewBookArrivedListener) iin;
             }
-            return new IOnNewBookArrivedListener.Stub.Proxy(obj);
+            return new Proxy(obj);
         }
 
         @Override
@@ -32,27 +32,21 @@ public interface IOnNewBookArrivedListener extends IInterface {
 
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
-            String descriptor = DESCRIPTOR;
             switch (code) {
-                case INTERFACE_TRANSACTION: {
-                    reply.writeString(descriptor);
+                case INTERFACE_TRANSACTION:
+                    reply.writeString(DESCRIPTOR);
                     return true;
-                }
-                case TRANSACTION_onNewBookArrived: {
-                    data.enforceInterface(descriptor);
-                    Book book;
-                    if (0 != data.readInt()) {
+                case TRANSACTION_ON_NEW_BOOK_ARRIVED:
+                    data.enforceInterface(DESCRIPTOR);
+                    Book book = null;
+                    if (data.readInt() != 0) {
                         book = Book.CREATOR.createFromParcel(data);
-                    } else {
-                        book = null;
                     }
-                    this.onNewBookArrived(book);
+                    onNewBookArrived(book);
                     reply.writeNoException();
                     return true;
-                }
-                default: {
+                default:
                     return super.onTransact(code, data, reply, flags);
-                }
             }
         }
 
@@ -69,10 +63,6 @@ public interface IOnNewBookArrivedListener extends IInterface {
                 return mRemote;
             }
 
-            public String getInterfaceDescriptor() {
-                return DESCRIPTOR;
-            }
-
             @Override
             public void onNewBookArrived(Book newBook) throws RemoteException {
                 Parcel data = Parcel.obtain();
@@ -85,7 +75,7 @@ public interface IOnNewBookArrivedListener extends IInterface {
                     } else {
                         data.writeInt(0);
                     }
-                    mRemote.transact(Stub.TRANSACTION_onNewBookArrived, data, reply, 0);
+                    mRemote.transact(Stub.TRANSACTION_ON_NEW_BOOK_ARRIVED, data, reply, 0);
                     reply.readException();
                 } finally {
                     reply.recycle();
@@ -95,7 +85,7 @@ public interface IOnNewBookArrivedListener extends IInterface {
 
         }
 
-        static final int TRANSACTION_onNewBookArrived = (IBinder.FIRST_CALL_TRANSACTION + 0);
+        static final int TRANSACTION_ON_NEW_BOOK_ARRIVED = IBinder.FIRST_CALL_TRANSACTION;
     }
 
     void onNewBookArrived(Book newBook) throws RemoteException;
