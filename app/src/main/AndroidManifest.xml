@@ -2,13 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tino.ipc">
 
-    <uses-permission android:name="com.tino.ipc.permission.ACCESS_BOOK_SERVICE" />
+    <uses-permission android:name="com.tino.ipc.permission.ACCESS_BINDER_POOL" />
 
     <permission
-        android:name="com.tino.ipc.permission.ACCESS_BOOK_SERVICE"
+        android:name="com.tino.ipc.permission.ACCESS_BINDER_POOL"
         android:protectionLevel="normal" />
 
     <application
+        android:name=".BaseApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -24,9 +25,8 @@
         </activity>
 
         <service
-            android:name=".aidl.BookManagerService"
-            android:process=":remote" >
-        </service>
+            android:name=".aidl.BinderPoolService"
+            android:process=":remote" />
     </application>
 
 </manifest>

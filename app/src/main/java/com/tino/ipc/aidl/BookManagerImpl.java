@@ -1,19 +1,14 @@
 package com.tino.ipc.aidl;
 
-import android.app.Service;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Binder;
-import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
+
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Deprecated
-public class BookManagerService extends Service {
+public class BookManagerImpl extends IBookManager.Stub {
 
     private CopyOnWriteArrayList<Book> mBookList = new CopyOnWriteArrayList();
 
@@ -21,41 +16,10 @@ public class BookManagerService extends Service {
 
     private RemoteCallbackList<IOnNewBookArrivedListener> mListenerList = new RemoteCallbackList<>();
 
-    private Binder mBinder = new IBookManager.Stub() {
-        @Override
-        public List<Book> getBookList() throws RemoteException {
-            synchronized (mBookList) {
-                Log.i("BookManager", "BookManagerService--getBookList()");
-                return mBookList;
-            }
-        }
-
-        @Override
-        public void addBook(Book book) throws RemoteException {
-            synchronized (mBookList) {
-                mBookList.add(book);
-                Log.i("BookManager", "BookManagerService--addBook()");
-            }
-        }
-
-        @Override
-        public void registerListener(IOnNewBookArrivedListener listener) throws RemoteException {
-            mListenerList.register(listener);
-        }
-
-        @Override
-        public void unregisterListener(IOnNewBookArrivedListener listener) throws RemoteException {
-            mListenerList.unregister(listener);
-        }
-    };
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
+    public BookManagerImpl() {
         mBookList.add(new Book(1, "book#1"));
         mBookList.add(new Book(2, "book#2"));
-        Log.i("BookManager", "BookManagerService--onCreate()");
-
+        Log.i("BookManager", "BookManagerImpl()");
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -78,9 +42,29 @@ public class BookManagerService extends Service {
     }
 
     @Override
-    public void onDestroy() {
-        mIsServiceDestroyed.set(true);
-        super.onDestroy();
+    public List<Book> getBookList() throws RemoteException {
+        synchronized (mBookList) {
+            Log.i("BookManager", "BookManagerImpl--getBookList()");
+            return mBookList;
+        }
+    }
+
+    @Override
+    public void addBook(Book book) throws RemoteException {
+        synchronized (mBookList) {
+            mBookList.add(book);
+            Log.i("BookManager", "BookManagerImpl--addBook()");
+        }
+    }
+
+    @Override
+    public void registerListener(IOnNewBookArrivedListener listener) throws RemoteException {
+        mListenerList.register(listener);
+    }
+
+    @Override
+    public void unregisterListener(IOnNewBookArrivedListener listener) throws RemoteException {
+        mListenerList.unregister(listener);
     }
 
     private void onNewBookArrived(Book book) throws RemoteException {
@@ -99,12 +83,7 @@ public class BookManagerService extends Service {
         mListenerList.finishBroadcast();
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        if (checkCallingOrSelfPermission("com.tino.ipc.permission.ACCESS_BINDER_POOL") == PackageManager.PERMISSION_DENIED) {
-            return null;
-        }
-        Log.i("BookManager", "BookManagerService--onBind()");
-        return mBinder;
+    public void destroy() {
+        mIsServiceDestroyed.set(true);
     }
 }
