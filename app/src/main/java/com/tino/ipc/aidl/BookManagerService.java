@@ -2,6 +2,7 @@ package com.tino.ipc.aidl;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
@@ -20,7 +21,7 @@ public class BookManagerService extends Service {
 
     private RemoteCallbackList<IOnNewBookArrivedListener> mListenerList = new RemoteCallbackList<>();
 
-    private Binder mBinder = new IBookManager.Stub() {
+    private Binder mBinder = new IBookManager.Stub(this) {
         @Override
         public List<Book> getBookList() throws RemoteException {
             synchronized (mBookList) {
@@ -100,6 +101,9 @@ public class BookManagerService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        if (checkCallingOrSelfPermission("com.tino.ipc.permission.ACCESS_BOOK_SERVICE") == PackageManager.PERMISSION_DENIED) {
+            return null;
+        }
         Log.i("BookManager", "BookManagerService--onBind()");
         return mBinder;
     }

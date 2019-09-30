@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tino.ipc">
 
+    <uses-permission android:name="com.tino.ipc.permission.ACCESS_BOOK_SERVICE" />
+
+    <permission
+        android:name="com.tino.ipc.permission.ACCESS_BOOK_SERVICE"
+        android:protectionLevel="normal" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

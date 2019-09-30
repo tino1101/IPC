@@ -1,5 +1,7 @@
 package com.tino.ipc.aidl;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.IInterface;
@@ -15,7 +17,10 @@ public interface IBookManager extends IInterface {
 
         private static final String DESCRIPTOR = "com.tino.ipc.aidl.IBookManager";
 
-        public Stub() {
+        private Context mContext;
+
+        public Stub(Context context) {
+            mContext = context;
             attachInterface(this, DESCRIPTOR);
             Log.i("BookManager", "Stub--Stub()");
         }
@@ -36,8 +41,26 @@ public interface IBookManager extends IInterface {
             return this;
         }
 
+        private boolean hasPermission() {
+            int check = mContext.checkCallingOrSelfPermission("com.tino.ipc.permission.ACCESS_BOOK_SERVICE");
+            if (check == PackageManager.PERMISSION_DENIED) {
+                return false;
+            }
+            String packageName = null;
+            String[] packages = mContext.getPackageManager().getPackagesForUid(getCallingUid());
+            if (packages != null && packages.length > 0) {
+                packageName = packages[0];
+                Log.i("BookManager", packageName);
+            }
+            if (packageName == null || !packageName.startsWith("com.tino")) {
+                return false;
+            }
+            return true;
+        }
+
         @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+            if (!hasPermission()) return false;
             Log.i("BookManager", "Stub--onTransact()");
             switch (code) {
                 case INTERFACE_TRANSACTION:
@@ -51,7 +74,7 @@ public interface IBookManager extends IInterface {
                     return true;
                 case TRANSACTION_ADD_BOOK:
                     data.enforceInterface(DESCRIPTOR);
-                    Book book= null;
+                    Book book = null;
                     if (data.readInt() != 0) {
                         book = Book.CREATOR.createFromParcel(data);
                     }
